@@ -1,0 +1,15 @@
+{
+    "menu.cms": "Quản trị nội dung",
+    "menu.cms.categories": "Danh mục",
+    "menu.cms.categories.list": "Danh sách danh mục",
+    "menu.cms.categories.create": "Tạo danh mục",
+    "menu.cms.categories.edit": "Chỉnh sửa danh mục",
+    "menu.cms.tags": "Thẻ",
+    "menu.cms.tags.list": "Danh sách thẻ",
+    "menu.cms.tags.create": "Tạo thẻ",
+    "menu.cms.tags.edit": "Chỉnh sửa thẻ",
+    "menu.cms.posts": "Bài viết",
+    "menu.cms.posts.list": "Danh sách bài viết",
+    "menu.cms.posts.create": "Tạo bài viết",
+    "menu.cms.posts.edit": "Chỉnh sửa bài viết"
+}
