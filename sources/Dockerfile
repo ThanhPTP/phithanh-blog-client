@@ -1,10 +1,8 @@
 FROM node:alpine AS builder
 ENV NODE_ENV production
 WORKDIR /app
-COPY . .
-RUN yarn install --peer
-RUN yarn add tailwindcss@latest postcss@latest autoprefixer@latest
+COPY ./sources/ .
+RUN yarn install
+RUN yarn add -D tailwindcss postcss autoprefixer
 RUN yarn build
-FROM nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+CMD ["serve", "-s", "dist", "-p", "3000"]
