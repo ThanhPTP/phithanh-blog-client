@@ -5,6 +5,8 @@ import {
   ProFormText,
   PageContainer,
   ProCard,
+  ProFormDateTimePicker,
+  ProFormCheckbox
 } from '@ant-design/pro-components';
 import React, { useState, useEffect, useRef } from 'react';
 import { LeftCircleOutlined, CloseCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -12,7 +14,8 @@ import { useParams, useModel } from 'umi';
 import {
   message, Spin, Upload,
   Form,
-  UploadFile, Button
+  UploadFile, Button,
+  Col, Row
 } from 'antd';
 import { RcFile, UploadChangeParam, UploadProps } from 'antd/es/upload';
 // @ts-ignore
@@ -148,87 +151,96 @@ const PostForm: React.FC<unknown> = () => {
 
               return {};
             }}>
-            <ProFormText
-              fieldProps={{
-                onChange: (e) => {
-                  formRef.current?.setFieldValue('slug', slugify(e.target.value))
-                }
-              }}
-              required
-              width="lg"
-              name="title"
-              label="Tiêu đề"
-              placeholder="Nhập tiêu đề"
-              rules={[{ required: true, message: 'Xin nhập tiêu đề' }]}
-            />
-            <ProFormSelect
-              required
-              width="lg"
-              name="categoryId"
-              // @ts-ignore
-              request={async () => {
-                const { result, success } = await getListCategories({});
-                if (success) {
-                  return result?.data?.map(s => {
-                    return {
-                      value: s.id,
-                      label: s.name
+            <Row>
+              <Col span={16}>
+                <ProFormText
+                  fieldProps={{
+                    onChange: (e) => {
+                      formRef.current?.setFieldValue('slug', slugify(e.target.value))
                     }
-                  });
-                }
+                  }}
+                  required
+                  width="xl"
+                  name="title"
+                  label="Tiêu đề"
+                  placeholder="Nhập tiêu đề"
+                  rules={[{ required: true, message: 'Xin nhập tiêu đề' }]}
+                />
+                <ProFormText
+                  required
+                  width="xl"
+                  name="slug"
+                  label="Đường dẫn"
+                  placeholder="Nhập đường dẫn (vd: cach-de-day-hoc-hieu-qua)"
+                  rules={[{ required: true, message: 'Xin nhập đường dẫn' }]}
+                />
+                <ReactQuill
+                  theme="snow"
+                  style={{ height: "500px", marginBottom: "75px", marginRight: "50px" }}
+                  value={content}
+                  onChange={setContent} />
+              </Col>
+              <Col span={8}>
+                <ProFormSelect
+                  required
+                  width="xl"
+                  name="categoryId"
+                  // @ts-ignore
+                  request={async () => {
+                    const { result, success } = await getListCategories({});
+                    if (success) {
+                      return result?.data?.map(s => {
+                        return {
+                          value: s.id,
+                          label: s.name
+                        }
+                      });
+                    }
 
-                return [];
-              }}
-              label="Danh mục"
-            />
-            <Form.Item
-              required
-              label="Hình nền"
-              name="bannerUrl"
-            >
-              <Upload
-                listType="picture-card"
-                fileList={fileList}
-                onChange={handleChange}
-                beforeUpload={beforeUpload}
-                name="bannerUrl"
-                showUploadList={{
-                  showRemoveIcon: false,
-                }}
-                itemRender={(originNode, file, fileList, actions) => <div className='relative w-full h-full'>
-                  {originNode}
-                  <Button
-                    type="text"
-                    icon={<CloseCircleOutlined />}
-                    className="absolute text-red-dark-25 -top-3 -right-3"
-                    onClick={actions.remove}
+                    return [];
+                  }}
+                  label="Danh mục"
+                />
+                <Form.Item
+                  required
+                  label="Hình nền"
+                  name="bannerUrl"
+                >
+                  <Upload
+                    listType="picture-card"
+                    fileList={fileList}
+                    onChange={handleChange}
+                    beforeUpload={beforeUpload}
+                    name="bannerUrl"
+                    showUploadList={{
+                      showRemoveIcon: false,
+                    }}
+                    itemRender={(originNode, file, fileList, actions) => <div className='relative w-full h-full'>
+                      {originNode}
+                      <Button
+                        type="text"
+                        icon={<CloseCircleOutlined />}
+                        className="absolute text-red-dark-25 -top-3 -right-3"
+                        onClick={actions.remove}
+                      >
+                      </Button>
+                    </div>
+                    }
                   >
-                  </Button>
-                </div>
-                }
-              >
-                {fileList?.length >= 1 ? null : uploadButton}
-              </Upload>
-            </Form.Item>
-            <ProFormText
-              required
-              width="lg"
-              name="slug"
-              label="Đường dẫn"
-              placeholder="Nhập đường dẫn (vd: cach-de-day-hoc-hieu-qua)"
-              rules={[{ required: true, message: 'Xin nhập đường dẫn' }]}
-            />
-            {/* <ProFormText
-              width="lg"
-              name="content"
-              label="Nội dung"
-              placeholder="Nhập nội dung"
-            /> */}
-            <ReactQuill
-              theme="snow"
-              style={{ height: "500px", marginBottom: "50px" }}
-              value={content}
-              onChange={setContent} />
+                    {fileList?.length >= 1 ? null : uploadButton}
+                  </Upload>
+                </Form.Item>
+                <ProFormCheckbox
+                  name="isPublishImmediately"
+                  label="Phát hành ngay"
+                />
+                <ProFormDateTimePicker
+                  width="xl"
+                  name="displayDate"
+                  label="Ngày hiển thị"
+                />
+              </Col>
+            </Row>
           </ProForm>
         </ProCard>
       </Spin>
