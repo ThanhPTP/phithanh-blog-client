@@ -4,10 +4,12 @@ import {
   PageContainer,
   ProCard,
   ProForm,
-  ProFormText
+  ProFormText,
+  ProFormDigit
 } from '@ant-design/pro-components';
 import { message, Spin, UploadFile, Upload, Button, Form } from 'antd';
 import React, { useState, useEffect, useRef } from 'react';
+// @ts-ignore
 import { useParams } from 'umi';
 import type { ProFormInstance } from '@ant-design/pro-components';
 import { slugify } from '@/utils/format';
@@ -159,6 +161,14 @@ const CategoryForm: React.FC<unknown> = () => {
               label="Đường dẫn"
               placeholder="Nhập đường dẫn (vd: cach-de-day-hoc-hieu-qua)"
               rules={[{ required: true, message: 'Xin nhập đường dẫn' }]}
+            />
+            <ProFormDigit
+              required
+              width="lg"
+              name="order"
+              label="Thứ tự"
+              placeholder="Nhập thứ tự"
+              rules={[{ required: true, message: 'Xin nhập thứ tự hiển thị' }]}
             />
             <Form.Item
               required

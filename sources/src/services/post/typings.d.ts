@@ -4,6 +4,9 @@ declare namespace API {
   interface GetListPostsResponse {
     id?: string;
     title?: string;
+    tags: string[];
+    displayDate?: Date,
+    status: string,
     createdDate?: Date;
     modifiedDate?: Date;
   }

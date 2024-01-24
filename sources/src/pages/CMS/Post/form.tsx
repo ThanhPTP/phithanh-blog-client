@@ -5,12 +5,12 @@ import {
   ProFormText,
   PageContainer,
   ProCard,
-  ProFormDateTimePicker,
-  ProFormCheckbox
+  ProFormDateTimePicker
 } from '@ant-design/pro-components';
 import React, { useState, useEffect, useRef } from 'react';
-import { LeftCircleOutlined, CloseCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useParams, useModel } from 'umi';
+import { LeftCircleOutlined, CloseCircleOutlined, PlusOutlined, GlobalOutlined } from '@ant-design/icons';
+// @ts-ignore
+import { useParams } from 'umi';
 import {
   message, Spin, Upload,
   Form,
@@ -27,6 +27,7 @@ import 'react-quill/dist/quill.snow.css';
 
 const { getDetailPost, createOrUpdatePost } = services.PostController;
 const { getListCategories } = services.CategoryController;
+const { getListTags } = services.TagController;
 const { uploadFile } = services.FileController;
 
 const PostForm: React.FC<unknown> = () => {
@@ -34,16 +35,19 @@ const PostForm: React.FC<unknown> = () => {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("Tạo mới bài viết");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const { initialState } = useModel('@@initialState');
   const [content, setContent] = useState('');
+  const [isDraft, setIsDraft] = useState(false);
 
   const formRef = useRef<
     ProFormInstance<{
-      name: string;
+      title: string;
       slug?: string;
       bannerUrl?: string;
+      description?: string;
       categoryId?: string;
       content?: string;
+      displayDate: Date,
+      tags: string[]
     }>>();
 
   useEffect(() => {
@@ -71,18 +75,20 @@ const PostForm: React.FC<unknown> = () => {
 
   const handleSubmitForm = async (values: any) => {
     values.id = params.id;
-    console.log(fileList?.[0])
     if (!isEmpty(fileList) && !isEmpty(fileList?.[0]?.originFileObj)) {
       const formData = new FormData();
       formData.append('files', fileList?.[0]?.originFileObj as File);
       formData.append('prefixPath', 'media');
-      // @ts-ignore
-      formData.append('deviceId', initialState?.currentUser?.deviceId);
+      formData.append('ThumbSizes', '300');
       const res = await uploadFile(formData);
       const { result } = res
       if (result?.paths) {
         values.bannerUrl = result?.paths?.[0];
         values.content = content;
+        values.isDraft = isDraft;
+        if (values.displayDate) {
+          values.displayDate = new Date(values.displayDate).toISOString();
+        }
         const { success } = await createOrUpdatePost(values);
         if (success) {
           message.success('Thành công');
@@ -96,6 +102,10 @@ const PostForm: React.FC<unknown> = () => {
     else {
       values.bannerUrl = fileList?.[0]?.url;
       values.content = content;
+      values.isDraft = isDraft;
+      if (values.displayDate) {
+        values.displayDate = new Date(values.displayDate).toISOString();
+      }
       const { success } = await createOrUpdatePost(values);
       if (success) {
         message.success('Thành công');
@@ -125,15 +135,31 @@ const PostForm: React.FC<unknown> = () => {
           <ProForm
             formRef={formRef}
             submitter={{
-              searchConfig: {
-                submitText: 'Lưu',
+              submitButtonProps: {},
+              render: (props) => {
+                console.log(props);
+                return [
+                  <Button
+                    key="draft"
+                    onClick={() => {
+                      setIsDraft(true);
+                      props.form?.submit?.()
+                    }}
+                  >
+                    Lưu nháp
+                  </Button>,
+                  <Button
+                    type="primary"
+                    key="publish"
+                    onClick={() => {
+                      setIsDraft(false);
+                      props.form?.submit?.()
+                    }}
+                  >
+                    <GlobalOutlined /> Phát hành
+                  </Button>,
+                ];
               },
-              resetButtonProps: {
-                style: {
-                  display: 'none',
-                },
-              },
-              submitButtonProps: {}
             }}
             onFinish={handleSubmitForm}
             request={async () => {
@@ -152,7 +178,7 @@ const PostForm: React.FC<unknown> = () => {
               return {};
             }}>
             <Row>
-              <Col span={16}>
+              <Col lg={{ span: 16 }}>
                 <ProFormText
                   fieldProps={{
                     onChange: (e) => {
@@ -160,7 +186,6 @@ const PostForm: React.FC<unknown> = () => {
                     }
                   }}
                   required
-                  width="xl"
                   name="title"
                   label="Tiêu đề"
                   placeholder="Nhập tiêu đề"
@@ -168,27 +193,31 @@ const PostForm: React.FC<unknown> = () => {
                 />
                 <ProFormText
                   required
-                  width="xl"
                   name="slug"
                   label="Đường dẫn"
                   placeholder="Nhập đường dẫn (vd: cach-de-day-hoc-hieu-qua)"
                   rules={[{ required: true, message: 'Xin nhập đường dẫn' }]}
                 />
+                <ProFormText
+                  name="description"
+                  label="Mô tả ngắn"
+                  placeholder="Nhập mô tả"
+                />
                 <ReactQuill
                   theme="snow"
-                  style={{ height: "500px", marginBottom: "75px", marginRight: "50px" }}
+                  style={{ height: "500px", marginBottom: "75px" }}
                   value={content}
                   onChange={setContent} />
               </Col>
-              <Col span={8}>
+              <Col lg={{ span: 7, offset: 1 }}>
                 <ProFormSelect
                   required
-                  width="xl"
                   name="categoryId"
                   // @ts-ignore
                   request={async () => {
                     const { result, success } = await getListCategories({});
                     if (success) {
+                      // @ts-ignore
                       return result?.data?.map(s => {
                         return {
                           value: s.id,
@@ -196,10 +225,10 @@ const PostForm: React.FC<unknown> = () => {
                         }
                       });
                     }
-
                     return [];
                   }}
                   label="Danh mục"
+                  rules={[{ required: true, message: 'Xin chọn danh mục' }]}
                 />
                 <Form.Item
                   required
@@ -230,14 +259,28 @@ const PostForm: React.FC<unknown> = () => {
                     {fileList?.length >= 1 ? null : uploadButton}
                   </Upload>
                 </Form.Item>
-                <ProFormCheckbox
-                  name="isPublishImmediately"
-                  label="Phát hành ngay"
-                />
                 <ProFormDateTimePicker
-                  width="xl"
                   name="displayDate"
                   label="Ngày hiển thị"
+                />
+                <ProFormSelect
+                  mode='tags'
+                  name="tags"
+                  label="Thẻ"
+                  // @ts-ignore
+                  request={async () => {
+                    const { result, success } = await getListTags({});
+                    if (success) {
+                      // @ts-ignore
+                      return result?.data?.map(s => {
+                        return {
+                          value: s.key,
+                          label: s.key
+                        }
+                      });
+                    }
+                    return [];
+                  }}
                 />
               </Col>
             </Row>

@@ -2,6 +2,7 @@ import { ProConfigProvider } from '@ant-design/pro-components';
 import { Button, Form, Input } from 'antd';
 import styles from './index.less';
 import { KeyOutlined, UserOutlined } from '@ant-design/icons';
+// @ts-ignore
 import { Helmet, useModel } from '@umijs/max';
 
 export default () => {

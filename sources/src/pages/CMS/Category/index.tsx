@@ -9,7 +9,9 @@ import moment from 'moment';
 import React, { useRef, useState } from 'react';
 import { ClockCircleOutlined, PlusCircleFilled, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
+// @ts-ignore
 import { history } from '@umijs/max';
+// @ts-ignore
 import { Link } from 'umi';
 
 const { getListCategories, deleteCategory } = services.CategoryController;
@@ -38,6 +40,12 @@ const Category: React.FC<unknown> = () => {
       render: (_, record) => (
         <Link to={"/cms/categories/edit/" + record.id}>{record.name}</Link>
       )
+    },
+    {
+      title: 'Thứ tự',
+      dataIndex: 'order',
+      valueType: 'text',
+      hideInSearch: true
     },
     {
       title: () => <div><ClockCircleOutlined /> Ngày tạo</div>,
@@ -111,7 +119,7 @@ const Category: React.FC<unknown> = () => {
               pageSize: params.pageSize,
               pageIndex: params.current,
               sorter: {
-                createdDate: "asc"
+                order: "asc"
               }
             },
           });

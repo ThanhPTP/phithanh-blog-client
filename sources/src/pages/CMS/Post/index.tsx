@@ -8,8 +8,10 @@ import {
 import moment from 'moment';
 import React, { useRef, useState } from 'react';
 import { ClockCircleOutlined, PlusCircleFilled, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+// @ts-ignore
 import { history } from '@umijs/max';
 import { Button, message } from 'antd';
+// @ts-ignore
 import { Link } from 'umi';
 
 const { getListPosts, deletePost } = services.PostController;
@@ -40,6 +42,20 @@ const Post: React.FC<unknown> = () => {
       )
     },
     {
+      title: 'Danh mục',
+      dataIndex: 'category',
+      valueType: 'text'
+    },
+    {
+      title: () => <div><ClockCircleOutlined /> Ngày hiển thị</div>,
+      dataIndex: 'displayDate',
+      valueType: 'date',
+      hideInSearch: true,
+      render: (_, record) => (
+        <>{moment(record.createdDate).format('DD/MM/YYYY H:mm:ss')}</>
+      ),
+    },
+    {
       title: () => <div><ClockCircleOutlined /> Ngày tạo</div>,
       dataIndex: 'createdDate',
       valueType: 'date',
@@ -56,6 +72,15 @@ const Post: React.FC<unknown> = () => {
       render: (_, record) => (
         <>{moment(record.modifiedDate).format('DD/MM/YYYY H:mm:ss')}</>
       ),
+    },
+    {
+      title: 'Thẻ',
+      dataIndex: 'tags',
+      valueType: 'text',
+      render: (_, record) => {
+        let tags = record.tags.join(',');
+        return (<>{tags}</>);
+      }
     },
     {
       title: () => <div>Hành động</div>,
@@ -107,7 +132,7 @@ const Post: React.FC<unknown> = () => {
           // @ts-ignore
           const { result, success } = await getListPosts({
             ...params,
-            filter_options: {
+            filterOptions: {
               pageSize: params.pageSize,
               pageIndex: params.current,
               sorter: {
